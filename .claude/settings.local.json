@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(tail:*)",
+      "Bash(cd /c/Users/isoha/Desktop/kakugen-quiz && npm run build 2>&1)"
+    ]
+  }
+}
