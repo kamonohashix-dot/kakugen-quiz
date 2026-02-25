@@ -51,6 +51,31 @@ body {
 }
 #root { height: 100%; }
 
+/* ─── Mute button (shared) ─── */
+.mute-btn {
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.06);
+  cursor: pointer;
+  font-size: 1.05rem;
+  flex-shrink: 0;
+  transition: background var(--ease), transform var(--ease);
+}
+.mute-btn:active      { transform: scale(0.90); }
+.mute-btn--muted      { background: rgba(255, 107, 53, 0.15); }
+
+/* ─── Home header right group ─── */
+.home-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 /* ─── App wrapper (max-width centering on desktop) ─── */
 .app-wrapper {
   height: 100dvh;

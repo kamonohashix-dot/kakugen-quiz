@@ -2,14 +2,15 @@ import { useState, useCallback } from 'react'
 import Mascot from '../components/Mascot'
 import { CATEGORIES } from '../data/quizData'
 
-export default function QuizScreen({ config, onComplete, onBack }) {
+export default function QuizScreen({ config, onComplete, onBack, sound }) {
   const { questions } = config
 
-  const [currentIndex, setCurrentIndex]   = useState(0)
+  const [currentIndex, setCurrentIndex]     = useState(0)
   const [selectedAnswer, setSelectedAnswer] = useState(null)
   const [showExplanation, setShowExplanation] = useState(false)
-  const [mascotState, setMascotState]     = useState('idle')
-  const [answers, setAnswers]             = useState([])
+  const [mascotState, setMascotState]       = useState('idle')
+  const [answers, setAnswers]               = useState([])
+  const [sessionStreak, setSessionStreak]   = useState(0)
 
   const current    = questions[currentIndex]
   const isAnswered = selectedAnswer !== null
@@ -29,10 +30,24 @@ export default function QuizScreen({ config, onComplete, onBack }) {
       { questionId: current.id, quote: current.quote, correct, category: current.category },
     ])
 
+    // 効果音
+    if (correct) {
+      const newStreak = sessionStreak + 1
+      setSessionStreak(newStreak)
+      if (newStreak >= 3 && newStreak % 3 === 0) {
+        sound.playStreak()   // 3・6・9…連続正解でファンファーレ
+      } else {
+        sound.playCorrect()  // 通常正解音
+      }
+    } else {
+      setSessionStreak(0)
+      sound.playWrong()      // 不正解音
+    }
+
     if (navigator.vibrate) {
       navigator.vibrate(correct ? [40] : [80, 40, 80])
     }
-  }, [isAnswered, current])
+  }, [isAnswered, current, sessionStreak, sound])
 
   const handleNext = () => {
     if (currentIndex + 1 >= questions.length) {
@@ -42,6 +57,7 @@ export default function QuizScreen({ config, onComplete, onBack }) {
       setSelectedAnswer(null)
       setShowExplanation(false)
       setMascotState('idle')
+      // sessionStreak はリセットしない（連続正解をクイズ全体で追跡）
     }
   }
 
@@ -63,6 +79,13 @@ export default function QuizScreen({ config, onComplete, onBack }) {
           <div className="quiz-progress-fill" style={{ width: `${progress}%` }} />
         </div>
         <div className="quiz-count">{currentIndex + 1}/{questions.length}</div>
+        <button
+          className={`mute-btn${sound.isMuted ? ' mute-btn--muted' : ''}`}
+          onClick={sound.toggleMute}
+          aria-label={sound.isMuted ? '音をオンにする' : '音をオフにする'}
+        >
+          {sound.isMuted ? '🔇' : '🔊'}
+        </button>
       </header>
 
       <div className="quiz-content">

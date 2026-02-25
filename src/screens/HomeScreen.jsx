@@ -27,7 +27,7 @@ function ActionBtn({ icon, title, sub, variant, onClick, disabled }) {
   )
 }
 
-export default function HomeScreen({ onStartQuiz, onCategorySelect, progress }) {
+export default function HomeScreen({ onStartQuiz, onCategorySelect, progress, sound }) {
   const {
     todayAnswered, todayCorrect,
     streak, accuracy,
@@ -50,12 +50,21 @@ export default function HomeScreen({ onStartQuiz, onCategorySelect, progress }) 
       {/* ─── Header ─── */}
       <header className="home-header">
         <div className="home-title">相場の格言道場</div>
-        {streak > 0 && (
-          <div className="streak-badge">
-            <span>🔥</span>
-            <span>{streak}</span>
-          </div>
-        )}
+        <div className="home-header-right">
+          {streak > 0 && (
+            <div className="streak-badge">
+              <span>🔥</span>
+              <span>{streak}</span>
+            </div>
+          )}
+          <button
+            className={`mute-btn${sound.isMuted ? ' mute-btn--muted' : ''}`}
+            onClick={sound.toggleMute}
+            aria-label={sound.isMuted ? '音をオンにする' : '音をオフにする'}
+          >
+            {sound.isMuted ? '🔇' : '🔊'}
+          </button>
+        </div>
       </header>
 
       {/* ─── Mascot ─── */}

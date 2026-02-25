@@ -4,6 +4,7 @@ import CategoryScreen from './screens/CategoryScreen'
 import QuizScreen     from './screens/QuizScreen'
 import ResultScreen   from './screens/ResultScreen'
 import { useProgress } from './hooks/useProgress'
+import { useSound }    from './hooks/useSound'
 import { quizData }    from './data/quizData'
 
 export default function App() {
@@ -11,6 +12,7 @@ export default function App() {
   const [quizConfig, setQuizConfig] = useState(null)
   const [quizResult, setQuizResult] = useState(null)
   const progress = useProgress()
+  const sound    = useSound()
 
   const startQuiz = (mode, category = null) => {
     let questions
@@ -64,6 +66,7 @@ export default function App() {
           onStartQuiz={startQuiz}
           onCategorySelect={() => setScreen('categories')}
           progress={progress}
+          sound={sound}
         />
       )}
 
@@ -80,6 +83,7 @@ export default function App() {
           config={quizConfig}
           onComplete={handleQuizComplete}
           onBack={() => setScreen('home')}
+          sound={sound}
         />
       )}
 
