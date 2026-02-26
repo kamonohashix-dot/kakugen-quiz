@@ -1,5 +1,4 @@
 import Mascot from '../components/Mascot'
-import { quizData } from '../data/quizData'
 
 function StatCard({ icon, value, label }) {
   return (
@@ -27,7 +26,7 @@ function ActionBtn({ icon, title, sub, variant, onClick, disabled }) {
   )
 }
 
-export default function HomeScreen({ onStartQuiz, onCategorySelect, progress, sound }) {
+export default function HomeScreen({ onStartQuiz, onCategorySelect, onMyPage, progress, sound }) {
   const {
     todayAnswered, todayCorrect,
     streak, accuracy,
@@ -106,11 +105,11 @@ export default function HomeScreen({ onStartQuiz, onCategorySelect, progress, so
           disabled={wrongAnswers.length === 0}
         />
         <ActionBtn
-          icon="🏅"
-          title="全問チャレンジ"
-          sub={`${quizData.length}問に挑戦`}
+          icon="👤"
+          title="マイページ"
+          sub="スコア・成績を確認"
           variant="challenge"
-          onClick={() => onStartQuiz('all')}
+          onClick={onMyPage}
         />
       </div>
     </div>

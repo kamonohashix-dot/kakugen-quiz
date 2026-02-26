@@ -3,6 +3,7 @@ import HomeScreen     from './screens/HomeScreen'
 import CategoryScreen from './screens/CategoryScreen'
 import QuizScreen     from './screens/QuizScreen'
 import ResultScreen   from './screens/ResultScreen'
+import MyPageScreen   from './screens/MyPageScreen'
 import { useProgress } from './hooks/useProgress'
 import { useSound }    from './hooks/useSound'
 import { quizData }    from './data/quizData'
@@ -65,6 +66,7 @@ export default function App() {
         <HomeScreen
           onStartQuiz={startQuiz}
           onCategorySelect={() => setScreen('categories')}
+          onMyPage={() => setScreen('mypage')}
           progress={progress}
           sound={sound}
         />
@@ -92,6 +94,13 @@ export default function App() {
           result={quizResult}
           onHome={() => setScreen('home')}
           onRetry={() => startQuiz(quizConfig.mode, quizConfig.category)}
+        />
+      )}
+
+      {screen === 'mypage' && (
+        <MyPageScreen
+          onBack={() => setScreen('home')}
+          progress={progress}
         />
       )}
     </div>

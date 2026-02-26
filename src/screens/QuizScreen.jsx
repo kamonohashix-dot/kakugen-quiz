@@ -21,6 +21,8 @@ export default function QuizScreen({ config, onComplete, onBack, sound }) {
   const handleAnswer = useCallback((idx) => {
     if (isAnswered || !current) return
 
+    sound.playTap()  // 選択肢タップ時
+
     const correct = idx === current.correct
     setSelectedAnswer(idx)
     setMascotState(correct ? 'happy' : 'sad')
@@ -35,13 +37,13 @@ export default function QuizScreen({ config, onComplete, onBack, sound }) {
       const newStreak = sessionStreak + 1
       setSessionStreak(newStreak)
       if (newStreak >= 3 && newStreak % 3 === 0) {
-        sound.playStreak()   // 3・6・9…連続正解でファンファーレ
+        sound.playStreak()   // 3・6・9…連続正解時
       } else {
-        sound.playCorrect()  // 通常正解音
+        sound.playCorrect()  // 通常正解時
       }
     } else {
       setSessionStreak(0)
-      sound.playWrong()      // 不正解音
+      sound.playWrong()      // 不正解時
     }
 
     if (navigator.vibrate) {
@@ -51,6 +53,7 @@ export default function QuizScreen({ config, onComplete, onBack, sound }) {
 
   const handleNext = () => {
     if (currentIndex + 1 >= questions.length) {
+      sound.playFanfare()              // クイズ完了時（全問終了）
       onComplete({ answers: [...answers] })
     } else {
       setCurrentIndex(i => i + 1)
