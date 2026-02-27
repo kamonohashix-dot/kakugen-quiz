@@ -106,7 +106,7 @@ export default function SettingsScreen({ progress, onReset }) {
       <div className="settings-section">
         <div className="settings-section-title">📱 アプリ情報</div>
         {[
-          { label: 'アプリ名',     value: '相場の格言道場' },
+          { label: 'アプリ名',     value: '株格言＋' },
           { label: 'バージョン',   value: '1.0.0'          },
           { label: '格言データ',   value: `${progress?.totalAnswered ?? 0}問回答済み` },
           { label: 'データ保存',   value: '端末内のみ'     },

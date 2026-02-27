@@ -157,7 +157,8 @@ export default function HomeScreen({ onStartQuiz, onCategorySelect, progress, so
     <div className="screen home-screen">
       {/* ─── Header ─── */}
       <header className="home-header">
-        <div className="home-title">相場の格言道場</div>
+        <div className="home-title">株格言＋</div>
+        <div className="home-subtitle">～格言を制する者は相場を制す～</div>
         <div className="home-header-right">
           {streak > 0 && (
             <div className="streak-badge">

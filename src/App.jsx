@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useFirebaseSync } from './hooks/useFirebaseSync'
 import HomeScreen     from './screens/HomeScreen'
 import CategoryScreen from './screens/CategoryScreen'
 import QuizScreen     from './screens/QuizScreen'
@@ -28,6 +29,11 @@ export default function App() {
 
   const progress = useProgress()
   const sound    = useSound()
+
+  // ── Firebase 匿名Auth + Firestoreスコア同期 ──────────────
+  // uid は将来の名寄せ機能で使用予定
+  // eslint-disable-next-line no-unused-vars
+  const { uid } = useFirebaseSync(progress)
 
   // ── クイズ開始 ──────────────────────────────────────────────
   const startQuiz = (mode, category = null) => {
@@ -72,6 +78,7 @@ export default function App() {
     progress.recordAnswers(result.answers, isPerfect)
     setQuizResult({ ...result, isPerfect })
     setActiveScreen('result')
+    // progress.totalAnswered の変化を useFirebaseSync が検知して1秒後に自動同期
   }
 
   // ── 結果→ホームへ ───────────────────────────────────────────

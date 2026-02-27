@@ -9,9 +9,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icon.svg'],
       manifest: {
-        name: '相場の格言道場',
-        short_name: '格言道場',
-        description: '相場の格言を楽しく学ぼう！投資の知恵を身につける格言クイズアプリ',
+        name: '株格言＋',
+        short_name: '株格言＋',
+        description: '格言を制する者は相場を制す。レジェンド達の知恵を最強の武器に進化しよう。',
         theme_color: '#FF6B35',
         background_color: '#FFF5F0',
         display: 'standalone',

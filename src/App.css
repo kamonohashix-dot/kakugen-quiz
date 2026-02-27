@@ -125,6 +125,13 @@ body {
   background-clip: text;
   letter-spacing: -0.01em;
 }
+.home-subtitle {
+  font-size: 0.62rem;
+  color: var(--text-sec);
+  font-weight: 500;
+  line-height: 1.4;
+  max-width: 180px;
+}
 
 .streak-badge {
   display: flex;
@@ -1591,3 +1598,97 @@ body {
   font-size: 0.88rem;
 }
 .search-empty-icon { font-size: 2.5rem; margin-bottom: 10px; }
+
+/* アイドル時ヒント */
+.search-idle-hint {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--text-sec);
+  font-size: 0.88rem;
+  line-height: 1.8;
+}
+.search-idle-icon { font-size: 2.5rem; margin-bottom: 10px; }
+
+/* ================================================================
+   トレンドセクション
+   ================================================================ */
+.trending-section {
+  padding: 16px 16px 8px;
+}
+
+.trending-header {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.trending-title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--text);
+}
+.trending-sub {
+  font-size: 0.7rem;
+  color: var(--text-sec);
+}
+
+.trending-chips {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.trending-chip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  background: var(--card-bg);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 10px 14px;
+  cursor: pointer;
+  text-align: left;
+  box-shadow: var(--sh-sm);
+  transition: background var(--ease), border-color var(--ease);
+}
+.trending-chip:active {
+  background: #FFF0E8;
+  border-color: var(--primary-light);
+}
+
+.trending-rank {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--text-sec);
+  width: 24px;
+  flex-shrink: 0;
+}
+.trending-chip:nth-child(1) .trending-rank { color: #FFD700; }
+.trending-chip:nth-child(2) .trending-rank { color: #C0C0C0; }
+.trending-chip:nth-child(3) .trending-rank { color: #CD7F32; }
+
+.trending-keyword {
+  flex: 1;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.trending-count {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--primary);
+  background: rgba(255, 107, 53, 0.1);
+  padding: 2px 8px;
+  border-radius: 100px;
+  white-space: nowrap;
+}
+
+.trending-hint {
+  text-align: center;
+  font-size: 0.72rem;
+  color: var(--text-sec);
+  margin-top: 12px;
+  padding-bottom: 4px;
+}
