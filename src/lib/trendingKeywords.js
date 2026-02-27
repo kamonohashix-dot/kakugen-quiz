@@ -5,101 +5,81 @@ import {
 } from 'firebase/firestore'
 import { db } from './firebase'
 
-// ── 名寄せマッピング（入力テキスト → canonical key） ──────
-export const KEYWORD_MAP = {
+// ── 名寄せマッピング（入力テキスト → 代表語） ───────────────
+// 値はFirestoreのdocIDと表示ラベルを兼ねた日本語代表語
+const ALIAS_MAP = {
   // バフェット関連
-  'ウォーレン':              'buffett',
-  'バフェット':              'buffett',
-  'オマハ':                  'buffett',
-  'ウォーレン・バフェット':  'buffett',
+  'ウォーレン':              'バフェット',
+  'バフェット':              'バフェット',
+  'オマハ':                  'バフェット',
+  'ウォーレン・バフェット':  'バフェット',
 
   // グレアム
-  'グレアム':                'graham',
-  'ベンジャミン・グレアム':  'graham',
-  'ベンジャミン':            'graham',
+  'グレアム':                'グレアム',
+  'ベンジャミン・グレアム':  'グレアム',
+  'ベンジャミン':            'グレアム',
 
   // テンプルトン
-  'テンプルトン':            'templeton',
-  'ジョン・テンプルトン':    'templeton',
+  'テンプルトン':            'テンプルトン',
+  'ジョン・テンプルトン':    'テンプルトン',
 
   // リンチ
-  'リンチ':                  'lynch',
-  'ピーター・リンチ':        'lynch',
+  'リンチ':                  'ピーター・リンチ',
+  'ピーター・リンチ':        'ピーター・リンチ',
+  'ピーター':                'ピーター・リンチ',
 
   // リバモア
-  'リバモア':                'livermore',
-  'ジェシー・リバモア':      'livermore',
-  'ジェシー':                'livermore',
+  'リバモア':                'リバモア',
+  'ジェシー・リバモア':      'リバモア',
+  'ジェシー':                'リバモア',
 
   // 千利休
-  '千利休':                  'rikyu',
-  '利休':                    'rikyu',
-  '日本の相場格言（千利休）': 'rikyu',
+  '千利休':                  '千利休',
+  '利休':                    '千利休',
 
   // シーゲル
-  'シーゲル':                'siegel',
-  'ジェレミー・シーゲル':    'siegel',
+  'シーゲル':                'シーゲル',
+  'ジェレミー・シーゲル':    'シーゲル',
 
   // フィッシャー
-  'フィリップ・フィッシャー': 'philfisher',
-  'ケン・フィッシャー':       'kenfisher',
+  'フィリップ・フィッシャー': 'フィリップ・フィッシャー',
+  'ケン・フィッシャー':       'ケン・フィッシャー',
+  'フィッシャー':             'ケン・フィッシャー',
 
   // アインシュタイン
-  'アインシュタイン':              'einstein',
-  'アルバート・アインシュタイン':  'einstein',
-
-  // カテゴリ系
-  '日本の相場格言': 'japan',
-  '日本のことわざ': 'japan',
-  'ウォール街の格言': 'wallstreet',
-  'ウォール街':     'wallstreet',
-  '西洋のことわざ': 'western',
+  'アインシュタイン':              'アインシュタイン',
+  'アルバート・アインシュタイン':  'アインシュタイン',
 }
 
-// canonical key → 表示ラベル
-const KEYWORD_DISPLAY = {
-  buffett:    'バフェット',
-  graham:     'グレアム',
-  templeton:  'テンプルトン',
-  lynch:      'ピーター・リンチ',
-  livermore:  'リバモア',
-  rikyu:      '千利休',
-  siegel:     'シーゲル',
-  philfisher: 'フィリップ・フィッシャー',
-  kenfisher:  'ケン・フィッシャー',
-  einstein:   'アインシュタイン',
-  japan:      '日本の相場格言',
-  wallstreet: 'ウォール街の格言',
-  western:    '西洋のことわざ',
-}
-
-// ── テキストを canonical key に解決 ────────────────────────
+// ── 入力を代表語に解決（名寄せ） ─────────────────────────────
+// 一致すれば代表語、しなければ null を返す
 export function resolveKeyword(text) {
   if (!text) return null
   const t = text.trim()
-  // 完全一致を先に試みる
-  if (KEYWORD_MAP[t]) {
-    const key = KEYWORD_MAP[t]
-    return { key, label: KEYWORD_DISPLAY[key] ?? t }
-  }
-  // 部分一致（入力がマッピングキーを含む）
-  for (const [mapKey, canonical] of Object.entries(KEYWORD_MAP)) {
-    if (t.includes(mapKey)) {
-      return { key: canonical, label: KEYWORD_DISPLAY[canonical] ?? mapKey }
-    }
+  if (ALIAS_MAP[t]) return ALIAS_MAP[t]
+  // 部分一致（例：「バフェット名言」→「バフェット」）
+  for (const [alias, canonical] of Object.entries(ALIAS_MAP)) {
+    if (t.includes(alias)) return canonical
   }
   return null
 }
 
-// ── Firestore にキーワードを記録（increment） ───────────────
+// ── Firestore にキーワードを記録 ──────────────────────────────
+// ・名寄せあり → 代表語をdocIDに使用（例: 'ウォーレン' → 'バフェット'）
+// ・名寄せなし → 入力そのままをdocIDに使用（例: 'ナイフ'）
 export async function recordKeyword(text) {
-  const resolved = resolveKeyword(text)
-  if (!resolved) return
+  const t = text?.trim()
+  if (!t || t.length < 2) return
+
+  const canonical = resolveKeyword(t) ?? t
+  // Firestoreで使えないスラッシュだけ除去
+  const docId = canonical.replace(/\//g, '')
+
   try {
     await setDoc(
-      doc(db, 'trending_keywords', resolved.key),
+      doc(db, 'trending_keywords', docId),
       {
-        keyword:   resolved.label,
+        keyword:   canonical,
         count:     increment(1),
         updatedAt: serverTimestamp(),
       },

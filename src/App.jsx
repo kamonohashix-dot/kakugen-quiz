@@ -144,7 +144,7 @@ export default function App() {
           />
         )}
         {activeTab === 'search' && (
-          <SearchScreen progress={progress} />
+          <SearchScreen progress={progress} sound={sound} />
         )}
         {activeTab === 'score' && (
           <ScoreScreen

@@ -1692,3 +1692,152 @@ body {
   margin-top: 12px;
   padding-bottom: 4px;
 }
+
+/* タップ可能なカード */
+.search-quote-card--tappable {
+  cursor: pointer;
+  transition: background var(--ease), transform var(--ease);
+}
+.search-quote-card--tappable:active {
+  background: #FFF0E8;
+  transform: scale(0.98);
+}
+.search-quote-arrow {
+  margin-left: auto;
+  font-size: 1.1rem;
+  color: var(--text-sec);
+  flex-shrink: 0;
+}
+
+/* ================================================================
+   格言詳細画面
+   ================================================================ */
+.quote-detail-screen {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 100dvh;
+  background: linear-gradient(160deg, var(--bg-top), var(--bg-bottom));
+}
+
+.quote-detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.quote-detail-header-title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.quote-detail-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.quote-detail-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.quote-detail-cat {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #fff;
+  padding: 3px 10px;
+  border-radius: 100px;
+}
+
+/* 格言カード */
+.quote-detail-card {
+  background: var(--card-bg);
+  border-radius: var(--r-md);
+  padding: 20px;
+  box-shadow: var(--sh-md);
+  margin-bottom: 20px;
+}
+.quote-detail-text {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+.quote-detail-author {
+  font-size: 0.78rem;
+  color: var(--text-sec);
+}
+
+/* セクションタイトル */
+.quote-detail-section-title {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--text-sec);
+  margin-bottom: 10px;
+  letter-spacing: 0.02em;
+}
+
+/* 選択肢 */
+.quote-detail-choices {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.quote-detail-choice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: var(--card-bg);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 10px 12px;
+}
+.quote-detail-choice--correct {
+  background: var(--success-bg);
+  border-color: var(--success);
+}
+.quote-detail-choice-letter {
+  font-size: 0.75rem;
+  font-weight: 800;
+  width: 20px;
+  flex-shrink: 0;
+  color: var(--text-sec);
+  padding-top: 1px;
+}
+.quote-detail-choice--correct .quote-detail-choice-letter {
+  color: var(--success);
+}
+.quote-detail-choice-text {
+  flex: 1;
+  font-size: 0.82rem;
+  color: var(--text);
+  line-height: 1.5;
+}
+.quote-detail-choice-mark {
+  font-size: 0.9rem;
+  color: var(--success);
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+/* 解説 */
+.quote-detail-explanation {
+  background: var(--card-bg);
+  border-radius: var(--r-sm);
+  padding: 14px 16px;
+  font-size: 0.83rem;
+  line-height: 1.75;
+  color: var(--text);
+  box-shadow: var(--sh-sm);
+  margin-bottom: 8px;
+}
