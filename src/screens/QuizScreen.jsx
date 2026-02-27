@@ -21,8 +21,6 @@ export default function QuizScreen({ config, onComplete, onBack, sound }) {
   const handleAnswer = useCallback((idx) => {
     if (isAnswered || !current) return
 
-    sound.playTap()  // 選択肢タップ時
-
     const correct = idx === current.correct
     setSelectedAnswer(idx)
     setMascotState(correct ? 'happy' : 'sad')
@@ -77,7 +75,7 @@ export default function QuizScreen({ config, onComplete, onBack, sound }) {
     <div className="screen quiz-screen">
       {/* ─── Header ─── */}
       <header className="quiz-header">
-        <button className="back-btn" onClick={onBack}>←</button>
+        <button className="back-btn" onClick={() => { sound.playTap(); onBack() }}>←</button>
         <div className="quiz-progress-bar">
           <div className="quiz-progress-fill" style={{ width: `${progress}%` }} />
         </div>

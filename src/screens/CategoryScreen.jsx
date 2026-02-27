@@ -1,12 +1,12 @@
 import { CATEGORIES, quizData } from '../data/quizData'
 
-export default function CategoryScreen({ onBack, onSelectCategory, progress }) {
+export default function CategoryScreen({ onBack, onSelectCategory, progress, sound }) {
   const { categoryProgress } = progress
 
   return (
     <div className="screen category-screen">
       <header className="screen-header">
-        <button className="back-btn" onClick={onBack}>←</button>
+        <button className="back-btn" onClick={() => { sound?.playTap?.(); onBack() }}>←</button>
         <h1 className="screen-title">カテゴリ学習</h1>
         <div style={{ width: 40 }} />
       </header>
@@ -27,7 +27,7 @@ export default function CategoryScreen({ onBack, onSelectCategory, progress }) {
               key={cat.name}
               className="category-card"
               style={{ '--cat-color': cat.color }}
-              onClick={() => onSelectCategory(cat.name)}
+              onClick={() => { sound?.playTap?.(); onSelectCategory(cat.name) }}
               disabled={count === 0}
             >
               <div className="category-icon">{cat.icon}</div>
