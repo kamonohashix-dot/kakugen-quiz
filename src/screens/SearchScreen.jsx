@@ -12,12 +12,30 @@ const LEVEL_COLORS = [
   '#27AE60', '#F39C12', '#FF6B35', '#FFD700',
 ]
 
+function shuffleChoices(choices, correctIndex) {
+  const items = choices.map((text, i) => ({ text, isCorrect: i === correctIndex }))
+  for (let i = items.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[items[i], items[j]] = [items[j], items[i]]
+  }
+  return {
+    shuffledChoices: items.map(c => c.text),
+    shuffledCorrect: items.findIndex(c => c.isCorrect),
+  }
+}
+
 // ── 格言詳細画面 ───────────────────────────────────────────
 function QuoteDetailScreen({ quote, questionStat, onBack, sound }) {
   const cat     = CATEGORIES.find(c => c.name === quote.category)
   const level   = questionStat?.memory_level ?? 0
   const answered = (questionStat?.correct_count ?? 0) + (questionStat?.wrong_count ?? 0)
   const mastered = level >= MASTERED_LEVEL
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const { shuffledChoices, shuffledCorrect } = useMemo(
+    () => shuffleChoices(quote.choices, quote.correct),
+    [quote.id],
+  )
 
   return (
     <div className="quote-detail-screen">
@@ -56,14 +74,14 @@ function QuoteDetailScreen({ quote, questionStat, onBack, sound }) {
         {/* 選択肢（正解を強調） */}
         <div className="quote-detail-section-title">📝 選択肢</div>
         <div className="quote-detail-choices">
-          {quote.choices.map((choice, idx) => (
+          {shuffledChoices.map((choice, idx) => (
             <div
               key={idx}
-              className={`quote-detail-choice${idx === quote.correct ? ' quote-detail-choice--correct' : ''}`}
+              className={`quote-detail-choice${idx === shuffledCorrect ? ' quote-detail-choice--correct' : ''}`}
             >
               <span className="quote-detail-choice-letter">{['A', 'B', 'C'][idx]}</span>
               <span className="quote-detail-choice-text">{choice}</span>
-              {idx === quote.correct && <span className="quote-detail-choice-mark">✓</span>}
+              {idx === shuffledCorrect && <span className="quote-detail-choice-mark">✓</span>}
             </div>
           ))}
         </div>
@@ -214,7 +232,6 @@ export default function SearchScreen({ progress, sound }) {
               >
                 <span className="trending-rank">#{i + 1}</span>
                 <span className="trending-keyword">{t.keyword}</span>
-                <span className="trending-count">🔥{t.count.toLocaleString()}</span>
               </button>
             ))}
           </div>

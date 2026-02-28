@@ -1,6 +1,18 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import Mascot from '../components/Mascot'
 import { CATEGORIES } from '../data/quizData'
+
+function shuffleChoices(choices, correctIndex) {
+  const items = choices.map((text, i) => ({ text, isCorrect: i === correctIndex }))
+  for (let i = items.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[items[i], items[j]] = [items[j], items[i]]
+  }
+  return {
+    shuffledChoices: items.map(c => c.text),
+    shuffledCorrect: items.findIndex(c => c.isCorrect),
+  }
+}
 
 export default function QuizScreen({ config, onComplete, onBack, sound }) {
   const { questions } = config
@@ -14,14 +26,23 @@ export default function QuizScreen({ config, onComplete, onBack, sound }) {
 
   const current    = questions[currentIndex]
   const isAnswered = selectedAnswer !== null
-  const isCorrect  = selectedAnswer === current?.correct
   const progress   = ((currentIndex) / questions.length) * 100
   const cat        = CATEGORIES.find(c => c.name === current?.category)
+
+  const { shuffledChoices, shuffledCorrect } = useMemo(
+    () => current
+      ? shuffleChoices(current.choices, current.correct)
+      : { shuffledChoices: [], shuffledCorrect: 0 },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [currentIndex],
+  )
+
+  const isCorrect = selectedAnswer === shuffledCorrect
 
   const handleAnswer = useCallback((idx) => {
     if (isAnswered || !current) return
 
-    const correct = idx === current.correct
+    const correct = idx === shuffledCorrect
     setSelectedAnswer(idx)
     setMascotState(correct ? 'happy' : 'sad')
     setShowExplanation(true)
@@ -32,22 +53,17 @@ export default function QuizScreen({ config, onComplete, onBack, sound }) {
 
     // 効果音
     if (correct) {
-      const newStreak = sessionStreak + 1
-      setSessionStreak(newStreak)
-      if (newStreak >= 3 && newStreak % 3 === 0) {
-        sound.playStreak()   // 3・6・9…連続正解時
-      } else {
-        sound.playCorrect()  // 通常正解時
-      }
+      setSessionStreak(prev => prev + 1)
+      sound.playCorrect()
     } else {
       setSessionStreak(0)
-      sound.playWrong()      // 不正解時
+      sound.playWrong()
     }
 
     if (navigator.vibrate) {
       navigator.vibrate(correct ? [40] : [80, 40, 80])
     }
-  }, [isAnswered, current, sessionStreak, sound])
+  }, [isAnswered, current, shuffledCorrect, sessionStreak, sound])
 
   const handleNext = () => {
     if (currentIndex + 1 >= questions.length) {
@@ -64,7 +80,7 @@ export default function QuizScreen({ config, onComplete, onBack, sound }) {
 
   const getButtonClass = (idx) => {
     if (!isAnswered) return 'choice-btn'
-    if (idx === current.correct) return 'choice-btn choice-btn--correct'
+    if (idx === shuffledCorrect) return 'choice-btn choice-btn--correct'
     if (idx === selectedAnswer)  return 'choice-btn choice-btn--wrong'
     return 'choice-btn choice-btn--dim'
   }
@@ -108,7 +124,7 @@ export default function QuizScreen({ config, onComplete, onBack, sound }) {
 
         {/* Choices */}
         <div className="choices-container">
-          {current.choices.map((choice, idx) => (
+          {shuffledChoices.map((choice, idx) => (
             <button
               key={idx}
               className={getButtonClass(idx)}
@@ -117,7 +133,7 @@ export default function QuizScreen({ config, onComplete, onBack, sound }) {
             >
               <span className="choice-letter">{['A', 'B', 'C'][idx]}</span>
               <span className="choice-text">{choice}</span>
-              {isAnswered && idx === current.correct && (
+              {isAnswered && idx === shuffledCorrect && (
                 <span className="choice-mark">✓</span>
               )}
               {isAnswered && idx === selectedAnswer && !isCorrect && (

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import Mascot from '../components/Mascot'
 import { CALENDAR_EVENTS, getEventIcon } from '../data/calendarEvents'
 import { quizData } from '../data/quizData'
@@ -28,21 +28,39 @@ function findMatchingQuestion(kakugenStr) {
   return q ?? null
 }
 
+function shuffleChoices(choices, correctIndex) {
+  const items = choices.map((text, i) => ({ text, isCorrect: i === correctIndex }))
+  for (let i = items.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[items[i], items[j]] = [items[j], items[i]]
+  }
+  return {
+    shuffledChoices: items.map(c => c.text),
+    shuffledCorrect: items.findIndex(c => c.isCorrect),
+  }
+}
+
 // ── 今日の格言ミニクイズカード ──────────────────────────────
 function TodayKakugenCard({ event, question, sound }) {
   const [answered, setAnswered] = useState(null)
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const { shuffledChoices, shuffledCorrect } = useMemo(
+    () => shuffleChoices(question.choices, question.correct),
+    [question.id],
+  )
+
   const handleAnswer = (idx) => {
     if (answered !== null) return
     setAnswered(idx)
-    if (idx === question.correct) {
+    if (idx === shuffledCorrect) {
       sound?.playCorrect?.()
     } else {
       sound?.playWrong?.()
     }
   }
 
-  const isCorrect = answered !== null && answered === question.correct
+  const isCorrect = answered !== null && answered === shuffledCorrect
 
   return (
     <div className="today-kakugen-card">
@@ -61,11 +79,11 @@ function TodayKakugenCard({ event, question, sound }) {
       <div className="today-kakugen-prompt">この格言の意味は？</div>
 
       <div className="today-kakugen-choices">
-        {question.choices.map((choice, idx) => {
+        {shuffledChoices.map((choice, idx) => {
           let cls = 'today-kakugen-choice'
           if (answered !== null) {
-            if (idx === question.correct)               cls += ' today-kakugen-choice--correct'
-            else if (idx === answered)                  cls += ' today-kakugen-choice--wrong'
+            if (idx === shuffledCorrect)  cls += ' today-kakugen-choice--correct'
+            else if (idx === answered)    cls += ' today-kakugen-choice--wrong'
           }
           return (
             <button key={idx} className={cls} onClick={() => handleAnswer(idx)}>
@@ -157,8 +175,10 @@ export default function HomeScreen({ onStartQuiz, onCategorySelect, progress, so
     <div className="screen home-screen">
       {/* ─── Header ─── */}
       <header className="home-header">
-        <div className="home-title">株格言＋</div>
-        <div className="home-subtitle">～格言を制する者は相場を制す～</div>
+        <div className="home-title-group">
+          <div className="home-title">株格言＋（ぷらす）</div>
+          <div className="home-subtitle">～レジェンド達の知恵は武器！格言を制する者は相場を制す！～</div>
+        </div>
         <div className="home-header-right">
           {streak > 0 && (
             <div className="streak-badge">
@@ -203,7 +223,7 @@ export default function HomeScreen({ onStartQuiz, onCategorySelect, progress, so
       <div className="action-buttons">
         <ActionBtn
           icon="⚡"
-          title="格言クイズ"
+          title="今日の格言クイズ"
           sub="ランダム5問"
           variant="primary"
           onClick={() => { sound.playTap(); onStartQuiz('random') }}
