@@ -38,7 +38,7 @@ function Confetti() {
 }
 
 export default function ResultScreen({ result, onHome, onRetry }) {
-  const { answers } = result
+  const { answers, xpGained = 0 } = result
   const total    = answers.length
   const correct  = answers.filter(a => a.correct).length
   const accuracy = total > 0 ? Math.round((correct / total) * 100) : 0
@@ -66,6 +66,11 @@ export default function ResultScreen({ result, onHome, onRetry }) {
         <p className="result-message">{message}</p>
 
         <Stars count={stars} />
+
+        {/* XP gained */}
+        {xpGained > 0 && (
+          <div className="result-xp-badge">+{xpGained} 経験値獲得！</div>
+        )}
 
         {/* Score card */}
         <div className="result-score-card">

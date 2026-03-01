@@ -2,6 +2,7 @@ import { signInAnonymously } from 'firebase/auth'
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { auth, db } from './firebase'
 import { calcScore, getTitle, TITLES } from './calcScore'
+import { getLoginTitle } from './expSystem'
 import { quizData } from '../data/quizData'
 
 // ── 匿名ログイン ────────────────────────────────────────────
@@ -28,15 +29,26 @@ export async function syncUserScore(uid, progress) {
   const titleIdx = TITLES.findIndex(t => s.total >= t.min)
   const level    = TITLES.length - 1 - (titleIdx >= 0 ? titleIdx : TITLES.length - 1)
 
+  const consecutiveClearDays = progress.consecutiveClearDays ?? 0
+  const loginTitleInfo       = getLoginTitle(consecutiveClearDays)
+
   const payload = {
+    // 既存スコア
     score:        parseFloat(s.total.toFixed(1)),
     title:        title.name,
     titleIcon:    title.icon,
     level,
-    experience:   progress.totalAnswered  ?? 0,
+    experience:   progress.totalAnswered ?? 0,
     masteredCount: s.masteredCount,
     accuracy:     s.accuracy,
-    streak:       progress.streak         ?? 0,
+    streak:       progress.streak        ?? 0,
+    // 経験値・レベルシステム
+    expLevel:     progress.level         ?? 1,
+    exp:          progress.exp           ?? 0,
+    // 連続デイリークリア
+    consecutiveClearDays,
+    loginTitle:   loginTitleInfo.name,
+    loginTitleIcon: loginTitleInfo.icon,
     updatedAt:    serverTimestamp(),
   }
 

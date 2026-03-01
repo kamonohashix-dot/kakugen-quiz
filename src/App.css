@@ -39,8 +39,17 @@
 }
 
 /* ─── Base ─── */
-html, body { height: 100%; overflow: hidden; }
+html {
+  height: 100%;
+  /* iOSキーボード表示時にビューポートがずれるのを防ぐ */
+  overflow: hidden;
+}
 body {
+  height: 100%;
+  overflow: hidden;
+  /* iOSで画面全体を固定し、キーボード表示時のレイアウトズレを防止 */
+  position: fixed;
+  width: 100%;
   font-family:
     'Hiragino Sans', 'Hiragino Kaku Gothic ProN',
     'Yu Gothic', 'Noto Sans JP',
@@ -116,21 +125,33 @@ body {
   padding: 18px 0 12px;
 }
 
+/* タイトル＋サブタイトルを縦並びにまとめる */
+.home-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+
 .home-title {
-  font-size: 1.25rem;
+  font-size: 1.15rem;
   font-weight: 900;
   background: linear-gradient(135deg, var(--primary), var(--primary-light));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   letter-spacing: -0.01em;
+  white-space: nowrap;
 }
 .home-subtitle {
-  font-size: 0.62rem;
+  font-size: 0.58rem;
   color: var(--text-sec);
   font-weight: 500;
   line-height: 1.4;
-  max-width: 180px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .streak-badge {
@@ -900,6 +921,9 @@ body {
   overflow-x: hidden;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  /* iOSでのスムーズスクロールとキーボード表示時のリフロー対応 */
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 .tab-content::-webkit-scrollbar { display: none; }
 
@@ -912,7 +936,8 @@ body {
 .tab-bar {
   display: flex;
   flex-shrink: 0;
-  height: 56px;
+  /* Safe Area分をheightに加算してアイコンが上に詰まらないようにする */
+  height: calc(56px + env(safe-area-inset-bottom, 0px));
   padding-bottom: env(safe-area-inset-bottom, 0px);
   background: var(--card-bg);
   border-top: 1px solid var(--border);
@@ -953,7 +978,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 14px;
-  padding: 16px 16px calc(env(safe-area-inset-bottom, 0px) + 20px);
+  padding: calc(env(safe-area-inset-top, 0px) + 16px) 16px calc(env(safe-area-inset-bottom, 0px) + 20px);
 }
 
 .score-title-card {
@@ -1034,6 +1059,39 @@ body {
   line-height: 1.5;
 }
 
+/* スコアの伸ばし方 */
+.score-tip-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.score-tip-row:last-child { border-bottom: none; }
+
+.score-tip-head {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.score-tip-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.score-tip-label {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--text);
+}
+.score-tip-text {
+  font-size: 0.78rem;
+  color: var(--text-sec);
+  line-height: 1.6;
+  padding-left: 15px;
+}
+
 .score-perfect-row {
   display: flex;
   align-items: center;
@@ -1052,7 +1110,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 14px;
-  padding: 16px 16px calc(env(safe-area-inset-bottom, 0px) + 20px);
+  padding: calc(env(safe-area-inset-top, 0px) + 16px) 16px calc(env(safe-area-inset-bottom, 0px) + 20px);
 }
 
 .badge-section {
@@ -1155,7 +1213,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 14px;
-  padding: 16px 16px calc(env(safe-area-inset-bottom, 0px) + 20px);
+  padding: calc(env(safe-area-inset-top, 0px) + 16px) 16px calc(env(safe-area-inset-bottom, 0px) + 20px);
 }
 
 .settings-section {
@@ -1435,10 +1493,12 @@ body {
 /* 固定ヘッダー（スクロール時に上部に吸着） */
 .search-sticky {
   position: sticky;
-  top: 0;
+  /* ステータスバーの下に吸着させる */
+  top: env(safe-area-inset-top, 0px);
   z-index: 20;
   background: linear-gradient(to bottom, var(--bg-top) 80%, transparent);
-  padding: 14px 16px 0;
+  /* 最初の表示位置もステータスバー分だけ下げる */
+  padding: calc(env(safe-area-inset-top, 0px) + 14px) 16px 0;
 }
 
 /* 検索バー */
@@ -1840,4 +1900,227 @@ body {
   color: var(--text);
   box-shadow: var(--sh-sm);
   margin-bottom: 8px;
+}
+
+/* ════════════════════════════════════════════════════════════
+   経験値・レベルシステム / 連続クリア / レベルアップポップアップ
+   ════════════════════════════════════════════════════════════ */
+
+/* ── ホーム画面: 経験値バー ─────────────────────────────────── */
+.home-level-section {
+  margin: 0 16px 10px;
+  background: var(--surface);
+  border-radius: 14px;
+  padding: 12px 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.home-level-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.home-level-badge {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--primary);
+}
+
+.home-level-xp {
+  font-size: 0.78rem;
+  color: var(--text-secondary, #888);
+}
+
+.home-level-bar-track {
+  height: 9px;
+  background: rgba(0,0,0,0.08);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.home-level-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+  border-radius: 5px;
+  transition: width 0.6s ease;
+  min-width: 4px;
+}
+
+.home-level-remain {
+  font-size: 0.72rem;
+  color: var(--text-secondary, #888);
+  margin-top: 4px;
+  text-align: right;
+}
+
+/* ── ホーム画面: 連続デイリークリアカード ───────────────────── */
+.home-clear-streak {
+  margin: 0 16px 10px;
+  background: linear-gradient(135deg, #ff6b35 0%, #f7c942 100%);
+  border-radius: 14px;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #fff;
+  box-shadow: 0 3px 10px rgba(255, 107, 53, 0.35);
+}
+
+.home-clear-streak-days {
+  font-size: 1.9rem;
+  font-weight: 900;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.home-clear-streak-info {
+  flex: 1;
+}
+
+.home-clear-streak-label {
+  font-size: 0.72rem;
+  opacity: 0.9;
+  margin-bottom: 2px;
+}
+
+.home-clear-streak-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+/* ── 結果画面: 経験値獲得バッジ ─────────────────────────────── */
+.result-xp-badge {
+  background: linear-gradient(135deg, #ff8c00, #ffd700);
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.15rem;
+  border-radius: 100px;
+  padding: 9px 28px;
+  margin: 0 auto 16px;
+  display: inline-block;
+  box-shadow: 0 4px 16px rgba(255, 165, 0, 0.4);
+  animation: xpBounce 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.25s both;
+}
+
+@keyframes xpBounce {
+  from { transform: scale(0.4); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
+/* ── カテゴリ画面: レベルバッジ ─────────────────────────────── */
+.category-name-sub {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: center;
+}
+
+.category-level-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--primary);
+  background: rgba(255, 107, 53, 0.14);
+  border-radius: 6px;
+  padding: 1px 6px;
+  white-space: nowrap;
+}
+
+/* ── レベルアップポップアップ ──────────────────────────────── */
+.levelup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.25s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.levelup-card {
+  position: relative;
+  background: linear-gradient(145deg, #1a1a2e 0%, #0f3460 100%);
+  border: 2.5px solid #ffd700;
+  border-radius: 28px;
+  padding: 36px 48px 32px;
+  text-align: center;
+  max-width: 320px;
+  width: 88%;
+  animation: levelupPop 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 0 48px rgba(255, 215, 0, 0.4);
+  overflow: hidden;
+}
+
+@keyframes levelupPop {
+  from { transform: scale(0.3) rotate(-6deg); opacity: 0; }
+  to   { transform: scale(1)   rotate(0deg);  opacity: 1; }
+}
+
+.levelup-sparkles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.levelup-sparkle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  font-size: 1.3rem;
+  animation: sparkleOut 1.8s ease-in-out calc(var(--delay, 0s)) infinite;
+}
+
+@keyframes sparkleOut {
+  0%   { opacity: 0; transform: rotate(var(--angle, 0deg)) translate(20px)  scale(0.3); }
+  45%  { opacity: 1; }
+  100% { opacity: 0; transform: rotate(var(--angle, 0deg)) translate(130px) scale(0.9); }
+}
+
+.levelup-mascot {
+  margin-bottom: 8px;
+}
+
+.levelup-title {
+  font-size: 2.6rem;
+  font-weight: 900;
+  color: #ffd700;
+  letter-spacing: 0.06em;
+  animation: glow 1s ease-in-out infinite alternate;
+  margin-bottom: 6px;
+}
+
+@keyframes glow {
+  from { text-shadow: 0 0 10px rgba(255, 215, 0, 0.6); }
+  to   { text-shadow: 0 0 32px rgba(255, 215, 0, 1), 0 0 64px rgba(255, 165, 0, 0.5); }
+}
+
+.levelup-levels {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 24px;
+}
+
+.levelup-old   { color: #aaa; }
+.levelup-arrow { color: #ffd700; }
+.levelup-new   { color: #ffd700; font-size: 1.85rem; }
+
+.levelup-close-btn {
+  background: linear-gradient(135deg, #ffd700, #ff8c00);
+  color: #1a1a2e;
+  font-weight: 800;
+  font-size: 0.95rem;
+  border: none;
+  border-radius: 100px;
+  padding: 13px 28px;
+  cursor: pointer;
+  width: 100%;
+  letter-spacing: 0.03em;
 }

@@ -8,6 +8,7 @@ import ScoreScreen    from './screens/ScoreScreen'
 import BadgeScreen    from './screens/BadgeScreen'
 import SettingsScreen from './screens/SettingsScreen'
 import SearchScreen   from './screens/SearchScreen'
+import Mascot         from './components/Mascot'
 import { useProgress } from './hooks/useProgress'
 import { useSound }    from './hooks/useSound'
 import { quizData }    from './data/quizData'
@@ -21,17 +22,48 @@ const TABS = [
   { id: 'settings', icon: '⚙️', label: '設定'    },
 ]
 
+// ── レベルアップポップアップ ─────────────────────────────────
+function LevelUpPopup({ oldLevel, newLevel, onClose }) {
+  const sparkles = Array.from({ length: 8 })
+  return (
+    <div className="levelup-overlay" onClick={onClose}>
+      <div className="levelup-card" onClick={e => e.stopPropagation()}>
+        <div className="levelup-sparkles" aria-hidden="true">
+          {sparkles.map((_, i) => (
+            <span
+              key={i}
+              className="levelup-sparkle"
+              style={{ '--delay': `${i * 0.15}s`, '--angle': `${i * 45}deg` }}
+            >✨</span>
+          ))}
+        </div>
+        <div className="levelup-mascot">
+          <Mascot state="happy" size="md" />
+        </div>
+        <div className="levelup-title">LEVEL UP!</div>
+        <div className="levelup-levels">
+          <span className="levelup-old">Lv.{oldLevel}</span>
+          <span className="levelup-arrow"> → </span>
+          <span className="levelup-new">Lv.{newLevel}</span>
+        </div>
+        <button className="levelup-close-btn" onClick={onClose}>
+          タップして続ける
+        </button>
+      </div>
+    </div>
+  )
+}
+
 export default function App() {
   const [activeTab,    setActiveTab]    = useState('home')
-  const [activeScreen, setActiveScreen] = useState(null)  // null | 'categories' | 'quiz' | 'result'
+  const [activeScreen, setActiveScreen] = useState(null)
   const [quizConfig,   setQuizConfig]   = useState(null)
   const [quizResult,   setQuizResult]   = useState(null)
+  const [levelUpInfo,  setLevelUpInfo]  = useState(null)
 
   const progress = useProgress()
   const sound    = useSound()
 
-  // ── Firebase 匿名Auth + Firestoreスコア同期 ──────────────
-  // uid は将来の名寄せ機能で使用予定
   // eslint-disable-next-line no-unused-vars
   const { uid } = useFirebaseSync(progress)
 
@@ -41,7 +73,6 @@ export default function App() {
 
     switch (mode) {
       case 'random': {
-        // ステップ3の出題アルゴリズムで5問選択
         const { questions: q } = selectQuestions(quizData, progress.questionStats)
         questions = q
         break
@@ -75,10 +106,18 @@ export default function App() {
   // ── クイズ完了 ──────────────────────────────────────────────
   const handleQuizComplete = (result) => {
     const isPerfect = result.answers.length > 0 && result.answers.every(a => a.correct)
-    progress.recordAnswers(result.answers, isPerfect)
-    setQuizResult({ ...result, isPerfect })
+    const isDaily   = quizConfig?.mode === 'random'
+
+    const { xpGained, oldLevel, newLevel, leveledUp } =
+      progress.recordAnswers(result.answers, { isPerfect, isDaily })
+
+    setQuizResult({ ...result, isPerfect, xpGained })
     setActiveScreen('result')
-    // progress.totalAnswered の変化を useFirebaseSync が検知して1秒後に自動同期
+
+    if (leveledUp) {
+      // 結果画面が表示された後にポップアップを出す
+      setTimeout(() => setLevelUpInfo({ oldLevel, newLevel }), 600)
+    }
   }
 
   // ── 結果→ホームへ ───────────────────────────────────────────
@@ -88,7 +127,7 @@ export default function App() {
     setQuizResult(null)
   }
 
-  // ── フルスクリーンモード（クイズ・カテゴリ・結果） ──────────
+  // ── フルスクリーンモード ────────────────────────────────────
   if (activeScreen === 'categories') {
     return (
       <div className="app-wrapper">
@@ -98,6 +137,13 @@ export default function App() {
           progress={progress}
           sound={sound}
         />
+        {levelUpInfo && (
+          <LevelUpPopup
+            oldLevel={levelUpInfo.oldLevel}
+            newLevel={levelUpInfo.newLevel}
+            onClose={() => setLevelUpInfo(null)}
+          />
+        )}
       </div>
     )
   }
@@ -127,6 +173,13 @@ export default function App() {
             startQuiz(quizConfig.mode, quizConfig.category)
           }}
         />
+        {levelUpInfo && (
+          <LevelUpPopup
+            oldLevel={levelUpInfo.oldLevel}
+            newLevel={levelUpInfo.newLevel}
+            onClose={() => setLevelUpInfo(null)}
+          />
+        )}
       </div>
     )
   }
@@ -134,6 +187,13 @@ export default function App() {
   // ── タブナビモード ───────────────────────────────────────────
   return (
     <div className="app-wrapper app-wrapper--tabs">
+      {levelUpInfo && (
+        <LevelUpPopup
+          oldLevel={levelUpInfo.oldLevel}
+          newLevel={levelUpInfo.newLevel}
+          onClose={() => setLevelUpInfo(null)}
+        />
+      )}
       <div className="tab-content">
         {activeTab === 'home' && (
           <HomeScreen

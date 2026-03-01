@@ -2,6 +2,12 @@ import { useState, useMemo } from 'react'
 import Mascot from '../components/Mascot'
 import { CALENDAR_EVENTS, getEventIcon } from '../data/calendarEvents'
 import { quizData } from '../data/quizData'
+import {
+  getLevelFromExp,
+  getLevelThreshold,
+  getNextLevelThreshold,
+  getLoginTitle,
+} from '../lib/expSystem'
 
 // ── 格言ファジーマッチ ───────────────────────────────────────
 function longestCommonSubstring(a, b) {
@@ -105,6 +111,52 @@ function TodayKakugenCard({ event, question, sound }) {
   )
 }
 
+// ── 経験値バー ──────────────────────────────────────────────
+function LevelBar({ exp, level }) {
+  const nextThreshold = getNextLevelThreshold(level)
+  const curThreshold  = getLevelThreshold(level)
+  const pct = nextThreshold
+    ? Math.min(((exp - curThreshold) / (nextThreshold - curThreshold)) * 100, 100)
+    : 100
+
+  return (
+    <div className="home-level-section">
+      <div className="home-level-row">
+        <span className="home-level-badge">Lv.{level}</span>
+        <span className="home-level-xp">
+          経験値 {exp.toLocaleString()} / {nextThreshold ? nextThreshold.toLocaleString() : '—'}
+        </span>
+      </div>
+      <div className="home-level-bar-track">
+        <div className="home-level-bar-fill" style={{ width: `${pct}%` }} />
+      </div>
+      {nextThreshold && (
+        <div className="home-level-remain">
+          次のレベルまであと <strong>{(nextThreshold - exp).toLocaleString()}</strong>
+        </div>
+      )}
+      {!nextThreshold && (
+        <div className="home-level-remain">最高レベル到達！</div>
+      )}
+    </div>
+  )
+}
+
+// ── 連続デイリークリアカード ────────────────────────────────
+function ClearStreakCard({ days }) {
+  if (days === 0) return null
+  const titleInfo = getLoginTitle(days)
+  return (
+    <div className="home-clear-streak">
+      <div className="home-clear-streak-days">🔥{days}</div>
+      <div className="home-clear-streak-info">
+        <div className="home-clear-streak-label">日連続デイリークリア</div>
+        <div className="home-clear-streak-title">{titleInfo.icon} {titleInfo.name}</div>
+      </div>
+    </div>
+  )
+}
+
 function StatCard({ icon, value, label }) {
   return (
     <div className="stat-card">
@@ -136,7 +188,11 @@ export default function HomeScreen({ onStartQuiz, onCategorySelect, progress, so
     todayAnswered, todayCorrect,
     streak, accuracy,
     wrongAnswers,
+    exp = 0,
+    consecutiveClearDays = 0,
   } = progress
+
+  const level = getLevelFromExp(exp)
 
   const todayAccuracy =
     todayAnswered > 0 ? Math.round((todayCorrect / todayAnswered) * 100) : 0
@@ -195,6 +251,12 @@ export default function HomeScreen({ onStartQuiz, onCategorySelect, progress, so
           </button>
         </div>
       </header>
+
+      {/* ─── 経験値バー ─── */}
+      <LevelBar exp={exp} level={level} />
+
+      {/* ─── 連続デイリークリア ─── */}
+      <ClearStreakCard days={consecutiveClearDays} />
 
       {/* ─── Mascot ─── */}
       <div className="home-mascot">

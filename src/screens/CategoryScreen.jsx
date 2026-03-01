@@ -1,7 +1,8 @@
 import { CATEGORIES, quizData } from '../data/quizData'
+import { getCategoryLevel } from '../lib/expSystem'
 
 export default function CategoryScreen({ onBack, onSelectCategory, progress, sound }) {
-  const { categoryProgress } = progress
+  const { categoryProgress, categoryExp = {} } = progress
 
   return (
     <div className="screen category-screen">
@@ -21,6 +22,7 @@ export default function CategoryScreen({ onBack, onSelectCategory, progress, sou
               : null
           const fillPct =
             count > 0 ? Math.min((catData.answered / count) * 100, 100) : 0
+          const catLv = getCategoryLevel(categoryExp[cat.name] ?? 0)
 
           return (
             <button
@@ -32,8 +34,13 @@ export default function CategoryScreen({ onBack, onSelectCategory, progress, sou
             >
               <div className="category-icon">{cat.icon}</div>
               <div className="category-name">{cat.name}</div>
-              <div className="category-count">
-                {count > 0 ? `${count}問` : '準備中'}
+              <div className="category-name-sub">
+                <span className="category-count">
+                  {count > 0 ? `${count}問` : '準備中'}
+                </span>
+                {(categoryExp[cat.name] ?? 0) > 0 && (
+                  <span className="category-level-badge">Lv.{catLv}</span>
+                )}
               </div>
               {catAccuracy !== null && (
                 <div className="category-accuracy">{catAccuracy}%</div>
