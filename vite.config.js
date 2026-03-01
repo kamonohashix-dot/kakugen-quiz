@@ -9,9 +9,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icon.svg'],
       manifest: {
-        name: '株格言＋',
+        name: '株格言＋（ぷらす）',
         short_name: '株格言＋',
-        description: '格言を制する者は相場を制す。レジェンド達の知恵を最強の武器に進化しよう。',
+        description: 'レジェンド達の知恵は武器！格言を制する者は相場を制す！',
         theme_color: '#FF6B35',
         background_color: '#FFF5F0',
         display: 'standalone',

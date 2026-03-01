@@ -1,5 +1,33 @@
 import { calcScore, getTitle, getNextTitle } from '../lib/calcScore'
 
+// スコアの伸ばし方ガイド
+const SCORE_TIPS = [
+  {
+    label: '会得済み',
+    color: 'var(--success)',
+    icon: '📗',
+    tip: '同じ問題を繰り返し正解してLv.7（MASTERED）へ。毎日のランダム出題をこなすのが最短ルート。',
+  },
+  {
+    label: '正解率',
+    color: 'var(--secondary)',
+    icon: '🎯',
+    tip: '不正解の問題を「復習モード」で集中練習しよう。解説をよく読んで理解してから次へ。',
+  },
+  {
+    label: '連勝記録',
+    color: '#FF5722',
+    icon: '🔥',
+    tip: '毎日クイズを続けてストリークを伸ばそう。答える前に解説を思い浮かべる習慣が大事。',
+  },
+  {
+    label: '復習徹底度',
+    color: 'var(--primary)',
+    icon: '📅',
+    tip: '期限が来た復習問題は忘れずに。ランダム出題に自動で混ざるので毎日1セットが基本。',
+  },
+]
+
 function ScoreBar({ value, max, color }) {
   const pct = max > 0 ? Math.min((value / max) * 100, 100) : 0
   return (
@@ -17,10 +45,10 @@ export default function ScoreScreen({ progress, totalQuestions }) {
 
   // スコア内訳
   const breakdown = [
-    { label: 'MASTERED枚数',  detail: `${s.masteredCount}/${totalQuestions}枚`, pts: s.A, max: 40, color: 'var(--success)' },
-    { label: '全体正答率',    detail: `${s.accuracy}%`,                          pts: s.B, max: 30, color: 'var(--secondary)' },
-    { label: 'ストリーク',    detail: `${streak}連続`,                           pts: s.C, max: 15, color: '#FF5722' },
-    { label: '復習遵守率',    detail: `${s.complianceRate}%`,                    pts: s.D, max: 15, color: 'var(--primary)' },
+    { label: '会得済み',      detail: `${s.masteredCount}枚`, pts: s.A, max: 40, color: 'var(--success)' },
+    { label: '正解率',        detail: `${s.accuracy}%`,                          pts: s.B, max: 30, color: 'var(--secondary)' },
+    { label: '連勝記録',      detail: `${streak}連続`,                           pts: s.C, max: 15, color: '#FF5722' },
+    { label: '復習徹底度',    detail: `${s.complianceRate}%`,                    pts: s.D, max: 15, color: 'var(--primary)' },
   ]
 
   // 最も改善余地が大きい要素
@@ -68,6 +96,20 @@ export default function ScoreScreen({ progress, totalQuestions }) {
         <div className="score-hint">
           💡 <strong>{hint.label}</strong> を上げるとスコアが伸びます！
         </div>
+      </div>
+
+      {/* ─── スコアの伸ばし方 ─── */}
+      <div className="score-section">
+        <div className="score-section-title">📈 スコアの伸ばし方</div>
+        {SCORE_TIPS.map((t, i) => (
+          <div key={i} className="score-tip-row">
+            <div className="score-tip-head">
+              <span className="score-tip-dot" style={{ background: t.color }} />
+              <span className="score-tip-label">{t.icon} {t.label}</span>
+            </div>
+            <div className="score-tip-text">{t.tip}</div>
+          </div>
+        ))}
       </div>
 
       {/* ─── 連続パーフェクト ─── */}
