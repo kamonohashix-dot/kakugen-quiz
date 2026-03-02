@@ -232,7 +232,7 @@ export default function HomeScreen({ onStartQuiz, onCategorySelect, progress, so
       {/* ─── Header ─── */}
       <header className="home-header">
         <div className="home-title-group">
-          <div className="home-title">株格言＋（ぷらす）</div>
+          <div className="home-title">株格言＋</div>
           <div className="home-subtitle">～レジェンド達の知恵は武器！格言を制する者は相場を制す！～</div>
         </div>
         <div className="home-header-right">
@@ -254,9 +254,6 @@ export default function HomeScreen({ onStartQuiz, onCategorySelect, progress, so
 
       {/* ─── 経験値バー ─── */}
       <LevelBar exp={exp} level={level} />
-
-      {/* ─── 連続デイリークリア ─── */}
-      <ClearStreakCard days={consecutiveClearDays} />
 
       {/* ─── Mascot ─── */}
       <div className="home-mascot">
@@ -334,6 +331,9 @@ export default function HomeScreen({ onStartQuiz, onCategorySelect, progress, so
               </div>
             ))}
           </div>
+
+          {/* ─── 連続デイリークリア（カレンダー最下段） ─── */}
+          <ClearStreakCard days={consecutiveClearDays} />
         </div>
       )}
 
