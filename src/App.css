@@ -936,8 +936,7 @@ body {
 .tab-bar {
   display: flex;
   flex-shrink: 0;
-  /* Safe Area分をheightに加算してアイコンが上に詰まらないようにする */
-  height: calc(56px + env(safe-area-inset-bottom, 0px));
+  height: auto;
   padding-bottom: env(safe-area-inset-bottom, 0px);
   background: var(--card-bg);
   border-top: 1px solid var(--border);
@@ -947,6 +946,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding: 6px 0 4px;
   justify-content: center;
   gap: 2px;
   flex: 1;
@@ -1493,12 +1493,10 @@ body {
 /* 固定ヘッダー（スクロール時に上部に吸着） */
 .search-sticky {
   position: sticky;
-  /* ステータスバーの下に吸着させる */
-  top: env(safe-area-inset-top, 0px);
+  top: 0;
   z-index: 20;
   background: linear-gradient(to bottom, var(--bg-top) 80%, transparent);
-  /* 最初の表示位置もステータスバー分だけ下げる */
-  padding: calc(env(safe-area-inset-top, 0px) + 14px) 16px 0;
+  padding: 14px 16px 0;
 }
 
 /* 検索バー */
