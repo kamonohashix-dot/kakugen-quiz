@@ -937,7 +937,7 @@ body {
   display: flex;
   flex-shrink: 0;
   height: auto;
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) / 2);
   background: var(--card-bg);
   border-top: 1px solid var(--border);
 }
@@ -1496,7 +1496,7 @@ body {
   top: 0;
   z-index: 20;
   background: linear-gradient(to bottom, var(--bg-top) 80%, transparent);
-  padding: 14px 16px 0;
+  padding: calc(env(safe-area-inset-top, 0px) + 8px) 16px 0;
 }
 
 /* 検索バー */
